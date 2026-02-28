@@ -1,0 +1,16 @@
+NOEUDS 6
+0 Routeur_Paris
+1 Routeur_Lyon
+2 Routeur_Marseille
+3 Routeur_Bordeaux
+4 Routeur_Nantes
+5 Routeur_Strasbourg
+ARETES 8
+0 1 10.5 100.0 5.0 8
+0 3 25.0 50.0 8.0 6
+0 4 20.0 75.0 6.0 7
+1 2 15.0 80.0 4.0 9
+1 5 30.0 60.0 7.0 5
+2 5 12.0 90.0 3.0 8
+3 4 8.0 120.0 2.0 9
+4 5 18.0 70.0 5.0 7
