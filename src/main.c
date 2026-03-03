@@ -16,13 +16,13 @@
 #include "dijkstra.h"
 #include "securite.h"
 #include "liste_chainee.h"
+#include "backtracking.h"
 
 /* ============================================================
  *  MENUS INTERACTIFS
  * ============================================================ */
 
-static void afficher_menu_principal(void)
-{
+static void afficher_menu_principal(void) {
     printf("\n+--------------------------------------------------+\n");
     printf("|       NetFlow Optimizer & Security Analyzer      |\n");
     printf("|              UVCI - ALC2101 - 2025-2026          |\n");
@@ -51,27 +51,17 @@ static void afficher_menu_principal(void)
     printf("Votre choix : ");
 }
 
-static int saisir_entier(const char *message)
-{
+static int saisir_entier(const char* message) {
     int val;
     printf("%s", message);
-    if (scanf("%d", &val) != 1)
-    {
-        scanf("%*[^\n]");
-        return -1;
-    }
+    if (scanf("%d", &val) != 1) { scanf("%*[^\n]"); return -1; }
     return val;
 }
 
-static float saisir_float(const char *message)
-{
+static float saisir_float(const char* message) {
     float val;
     printf("%s", message);
-    if (scanf("%f", &val) != 1)
-    {
-        scanf("%*[^\n]");
-        return -1.0f;
-    }
+    if (scanf("%f", &val) != 1) { scanf("%*[^\n]"); return -1.0f; }
     return val;
 }
 
@@ -79,78 +69,51 @@ static float saisir_float(const char *message)
  *  ACTIONS DU MENU
  * ============================================================ */
 
-static void action_dijkstra(const Graphe *g)
-{
-    int src = saisir_entier("  Nœud source      : ");
+static void action_dijkstra(const Graphe* g) {
+    int src  = saisir_entier("  Nœud source      : ");
     int dest = saisir_entier("  Nœud destination : ");
-    if (!noeud_existe(g, src) || !noeud_existe(g, dest))
-    {
-        printf("  [ERREUR] Nœuds invalides.\n");
-        return;
+    if (!noeud_existe(g, src) || !noeud_existe(g, dest)) {
+        printf("  [ERREUR] Nœuds invalides.\n"); return;
     }
-    Chemin *c = dijkstra(g, src, dest);
-    if (c)
-    {
-        afficher_chemin(c, g);
-        detruire_chemin(c);
-    }
-    else
-        printf("  Aucun chemin trouvé.\n");
+    Chemin* c = dijkstra(g, src, dest);
+    if (c) { afficher_chemin(c, g); detruire_chemin(c); }
+    else printf("  Aucun chemin trouvé.\n");
 }
 
-static void action_bellman_ford(const Graphe *g)
-{
-    int src = saisir_entier("  Nœud source      : ");
+static void action_bellman_ford(const Graphe* g) {
+    int src  = saisir_entier("  Nœud source      : ");
     int dest = saisir_entier("  Nœud destination : ");
     int cycle = 0;
-    Chemin *c = bellman_ford(g, src, dest, &cycle);
-    if (cycle)
-    {
-        printf("  [ALERTE] Cycle négatif détecté !\n");
-        return;
-    }
-    if (c)
-    {
-        afficher_chemin(c, g);
-        detruire_chemin(c);
-    }
-    else
-        printf("  Aucun chemin trouvé.\n");
+    Chemin* c = bellman_ford(g, src, dest, &cycle);
+    if (cycle) { printf("  [ALERTE] Cycle négatif détecté !\n"); return; }
+    if (c) { afficher_chemin(c, g); detruire_chemin(c); }
+    else printf("  Aucun chemin trouvé.\n");
 }
 
-static void action_backtracking(const Graphe *g)
-{
-    int src = saisir_entier("  Nœud source      : ");
+static void action_backtracking(const Graphe* g) {
+    int src  = saisir_entier("  Nœud source      : ");
     int dest = saisir_entier("  Nœud destination : ");
 
     Contraintes c;
-    c.bw_min_requise = saisir_float("  BW minimale (Mbps) : ");
+    c.bw_min_requise    = saisir_float("  BW minimale (Mbps) : ");
     c.cout_max_autorise = saisir_float("  Budget maximum     : ");
-    c.securite_min = saisir_entier("  Sécurité min (0-10): ");
-    c.noeuds_oblgatoires = NULL;
-    c.nb_obligatoires = 0;
-    c.noeuds_exclus = NULL;
-    c.nb_exclus = 0;
+    c.securite_min      = saisir_entier("  Sécurité min (0-10): ");
+    c.noeuds_oblgatoires = NULL; c.nb_obligatoires = 0;
+    c.noeuds_exclus      = NULL; c.nb_exclus = 0;
 
     printf("  [Recherche en cours avec backtracking...]\n");
-    Chemin *chemin = chemin_contraint_backtracking(g, src, dest, &c);
-    if (chemin)
-    {
-        afficher_chemin(chemin, g);
-        detruire_chemin(chemin);
-    }
-    else
-        printf("  Aucun chemin satisfaisant les contraintes.\n");
+    Chemin* chemin = chemin_contraint_backtracking(g, src, dest, &c);
+    if (chemin) { afficher_chemin(chemin, g); detruire_chemin(chemin); }
+    else printf("  Aucun chemin satisfaisant les contraintes.\n");
 }
 
-static void action_simulation(void)
-{
-    int capacite = saisir_entier("  Capacite de la file : ");
+static void action_simulation(void) {
+    int capacite  = saisir_entier("  Capacité de la file : ");
     int nb_paquets = saisir_entier("  Nombre de paquets   : ");
-    int src = saisir_entier("  Source              : ");
+    int src  = saisir_entier("  Source              : ");
     int dest = saisir_entier("  Destination         : ");
 
-    FileAttente *f = creer_file_attente(capacite);
+    FileAttente* f = creer_file_attente(capacite);
     simuler_flux(f, nb_paquets, src, dest);
     detruire_file_attente(f);
 }
@@ -159,202 +122,149 @@ static void action_simulation(void)
  *  MAIN
  * ============================================================ */
 
-int main(int argc, char *argv[])
-{
-    Graphe *g = NULL;
+int main(int argc, char* argv[]) {
+    Graphe* g = NULL;
     int choix;
 
-#ifdef _WIN32
+    #ifdef _WIN32
     SetConsoleOutputCP(65001);
     SetConsoleCP(65001);
 #endif
     printf("\nBienvenue dans NetFlow Optimizer & Security Analyzer\n");
 
     /* Chargement automatique si fichier passé en argument */
-    if (argc == 2)
-    {
+    if (argc == 2) {
         g = charger_graphe(argv[1]);
-        if (!g)
-            printf("[WARN] Chargement echoue, demarrage sans reseau.\n");
+        if (!g) printf("[WARN] Chargement échoué, démarrage sans réseau.\n");
     }
 
-    do
-    {
+    do {
         afficher_menu_principal();
-        if (scanf("%d", &choix) != 1)
-        {
-            scanf("%*[^\n]");
-            continue;
-        }
+        if (scanf("%d", &choix) != 1) { scanf("%*[^\n]"); continue; }
 
-        switch (choix)
-        {
-        case 1:
-        {
-            char fichier[256];
-            printf("  Chemin du fichier : ");
-            scanf("%255s", fichier);
-            Graphe *nouveau = charger_graphe(fichier);
-            if (nouveau)
-            {
+        switch (choix) {
+            case 1: {
+                char fichier[256];
+                printf("  Chemin du fichier : "); scanf("%255s", fichier);
+                Graphe* nouveau = charger_graphe(fichier);
+                if (nouveau) { detruire_graphe(g); g = nouveau; }
+                break;
+            }
+            case 2: {
+                int n = saisir_entier("  Nombre de nœuds max : ");
                 detruire_graphe(g);
-                g = nouveau;
-            }
-            break;
-        }
-        case 2:
-        {
-            int n = saisir_entier("  Nombre de noeuds max : ");
-            detruire_graphe(g);
-            g = creer_graphe(n, 1);
-            printf("  Graphe vide cree (%d noeuds max).\n", n);
-            break;
-        }
-        case 3:
-            if (!g)
-            {
-                printf("  Aucun reseau charge.\n");
+                g = creer_graphe(n, 1);
+                printf("  Graphe vide créé (%d nœuds max).\n", n);
                 break;
             }
-            afficher_graphe(g);
-            break;
-        case 4:
-        {
-            if (!g)
-            {
-                printf("  Chargez d\'abord un reseau.\n");
+            case 3:
+                if (!g) { printf("  Aucun réseau chargé.\n"); break; }
+                afficher_graphe(g);
+                break;
+            case 4: {
+                if (!g) { printf("  Chargez d'abord un réseau.\n"); break; }
+                int type = saisir_entier("  Ajouter (1=nœud, 2=arête) : ");
+                if (type == 1) {
+                    int id = saisir_entier("  ID : ");
+                    char nom[TAILLE_MAX_NOM];
+                    printf("  Nom : "); scanf("%49s", nom);
+                    if (ajouter_noeud(g, id, nom) == 0)
+                        printf("  Nœud ajouté.\n");
+                } else {
+                    int s = saisir_entier("  Source : ");
+                    int d = saisir_entier("  Dest   : ");
+                    float lat = saisir_float("  Latence  : ");
+                    float bw  = saisir_float("  BW       : ");
+                    float cout = saisir_float("  Coût     : ");
+                    int sec   = saisir_entier("  Sécurité : ");
+                    if (ajouter_arete(g, s, d, lat, bw, cout, sec) == 0)
+                        printf("  Arête ajoutée.\n");
+                }
                 break;
             }
-            int type = saisir_entier("  Ajouter (1=noeud, 2=arete) : ");
-            if (type == 1)
-            {
-                int id = saisir_entier("  ID : ");
-                char nom[TAILLE_MAX_NOM];
-                printf("  Nom : ");
-                scanf("%49s", nom);
-                if (ajouter_noeud(g, id, nom) == 0)
-                    printf("  Noeud ajoute.\n");
-            }
-            else
-            {
-                int s = saisir_entier("  Source : ");
-                int d = saisir_entier("  Dest   : ");
-                float lat = saisir_float("  Latence  : ");
-                float bw = saisir_float("  BW       : ");
-                float cout = saisir_float("  Cout     : ");
-                int sec = saisir_entier("  Securite : ");
-                if (ajouter_arete(g, s, d, lat, bw, cout, sec) == 0)
-                    printf("  Arete ajoutee.\n");
-            }
-            break;
-        }
-        case 5:
-        {
-            if (!g)
-                break;
-            int type = saisir_entier("  Supprimer (1=noeud, 2=arete) : ");
-            if (type == 1)
-            {
-                int id = saisir_entier("  ID du noeud : ");
-                supprimer_noeud(g, id);
-            }
-            else
-            {
-                int s = saisir_entier("  Source : ");
-                int d = saisir_entier("  Dest   : ");
-                supprimer_arete(g, s, d);
-            }
-            break;
-        }
-        case 6:
-            if (!g)
-            {
-                printf("  Aucun reseau charge.\n");
+            case 5: {
+                if (!g) break;
+                int type = saisir_entier("  Supprimer (1=nœud, 2=arête) : ");
+                if (type == 1) {
+                    int id = saisir_entier("  ID du nœud : ");
+                    supprimer_noeud(g, id);
+                } else {
+                    int s = saisir_entier("  Source : ");
+                    int d = saisir_entier("  Dest   : ");
+                    supprimer_arete(g, s, d);
+                }
                 break;
             }
-            action_dijkstra(g);
-            break;
-        case 7:
-            if (!g)
+            case 6:
+                if (!g) { printf("  Aucun réseau chargé.\n"); break; }
+                action_dijkstra(g);
                 break;
-            action_bellman_ford(g);
-            break;
-        case 8:
-            if (!g)
+            case 7:
+                if (!g) break;
+                action_bellman_ford(g);
                 break;
-            action_backtracking(g);
-            break;
-        case 9:
-        {
-            if (!g)
+            case 8:
+                if (!g) break;
+                action_backtracking(g);
                 break;
-            int src = saisir_entier("  Source      : ");
-            int dest = saisir_entier("  Destination : ");
-            int k = saisir_entier("  K chemins   : ");
-            Chemin *liste = k_plus_courts_chemins(g, src, dest, k);
-            Chemin *c = liste;
-            int i = 1;
-            while (c)
-            {
-                printf("\n--- Chemin %d ---\n", i++);
-                afficher_chemin(c, g);
-                c = c->suivant;
+            case 9: {
+                if (!g) break;
+                int src  = saisir_entier("  Source      : ");
+                int dest = saisir_entier("  Destination : ");
+                int k    = saisir_entier("  K chemins   : ");
+                Chemin* liste = k_plus_courts_chemins(g, src, dest, k);
+                Chemin* c = liste;
+                int i = 1;
+                while (c) {
+                    printf("\n--- Chemin %d ---\n", i++);
+                    afficher_chemin(c, g);
+                    c = c->suivant;
+                }
+                detruire_liste_chemins(liste);
+                break;
             }
-            detruire_liste_chemins(liste);
-            break;
-        }
-        case 10:
-        {
-            if (!g)
+            case 10: {
+                if (!g) break;
+                ResultatSecurite* res = analyser_securite(g);
+                afficher_resultats_securite(res, g);
+                detruire_resultat_securite(res);
                 break;
-            ResultatSecurite *res = analyser_securite(g);
-            afficher_resultats_securite(res, g);
-            detruire_resultat_securite(res);
-            break;
-        }
-        case 11:
-            if (!g)
+            }
+            case 11:
+                if (!g) break;
+                printf("  Cycle détecté : %s\n", detecter_cycle(g) ? "OUI" : "NON");
                 break;
-            printf("  Cycle détecté : %s\n", detecter_cycle(g) ? "OUI" : "NON");
-            break;
-        case 12:
-        {
-            if (!g)
+            case 12: {
+                if (!g) break;
+                ResultatSecurite res = {0};
+                trouver_points_articulation(g, &res);
+                afficher_resultats_securite(&res, g);
                 break;
-            ResultatSecurite res = {0};
-            trouver_points_articulation(g, &res);
-            afficher_resultats_securite(&res, g);
-            break;
-        }
-        case 13:
-        {
-            if (!g)
+            }
+            case 13: {
+                if (!g) break;
+                ResultatSecurite res = {0};
+                tarjan_scc(g, &res);
+                printf("  %d composante(s) fortement connexe(s)\n", res.nb_composantes);
+                free(res.composantes);
                 break;
-            ResultatSecurite res = {0};
-            tarjan_scc(g, &res);
-            printf("  %d composante(s) fortement connexe(s)\n", res.nb_composantes);
-            free(res.composantes);
-            break;
-        }
-        case 14:
-            action_simulation();
-            break;
-        case 15:
-        {
-            if (!g)
+            }
+            case 14:
+                action_simulation();
                 break;
-            char fichier[256];
-            printf("  Nom du fichier : ");
-            scanf("%255s", fichier);
-            if (sauvegarder_graphe(g, fichier) == 0)
-                printf("  Sauvegarde réussie.\n");
-            break;
-        }
-        case 0:
-            printf("\nAu revoir !\n");
-            break;
-        default:
-            printf("  Choix invalide.\n");
+            case 15: {
+                if (!g) break;
+                char fichier[256];
+                printf("  Nom du fichier : "); scanf("%255s", fichier);
+                if (sauvegarder_graphe(g, fichier) == 0)
+                    printf("  Sauvegarde réussie.\n");
+                break;
+            }
+            case 0:
+                printf("\nAu revoir !\n");
+                break;
+            default:
+                printf("  Choix invalide.\n");
         }
     } while (choix != 0);
 

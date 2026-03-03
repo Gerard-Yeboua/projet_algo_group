@@ -3,6 +3,7 @@
 
 ## Structure du Projet
 
+```
 ProjetNetFlow/
 ├── src/
 │   ├── interfaces.h        ← Structures partagées (LIRE EN PREMIER)

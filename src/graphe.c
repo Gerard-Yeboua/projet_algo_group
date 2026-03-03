@@ -4,7 +4,7 @@
  */
 
 #include "graphe.h"
-#include "liste_chainee.h"
+#include "utils.h"
 
 /* ============================================================
  *  CRÉATION / DESTRUCTION

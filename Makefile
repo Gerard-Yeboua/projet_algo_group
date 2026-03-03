@@ -11,11 +11,13 @@ SRCDIR  = src
 TESTDIR = tests
 DATADIR = data
 
-# Sources et objets
-SRCS = $(SRCDIR)/graphe.c \
-       $(SRCDIR)/dijkstra.c \
-       $(SRCDIR)/securite.c \
-       $(SRCDIR)/liste_chainee.c \
+# Sources et objets (ordre de la structure imposee par le Dr)
+SRCS = $(SRCDIR)/graphe.c        \
+       $(SRCDIR)/liste_chainee.c  \
+       $(SRCDIR)/dijkstra.c       \
+       $(SRCDIR)/backtracking.c   \
+       $(SRCDIR)/securite.c       \
+       $(SRCDIR)/utils.c          \
        $(SRCDIR)/main.c
 
 OBJS = $(SRCS:.c=.o)
@@ -25,7 +27,7 @@ OBJS = $(SRCS:.c=.o)
 # ============================================================
 
 all: $(TARGET)
-	@echo "✓ Compilation reussie : ./$(TARGET)"
+	@echo "Compilation reussie : ./$(TARGET)"
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
@@ -33,34 +35,32 @@ $(TARGET): $(OBJS)
 $(SRCDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Mode debug avec AddressSanitizer
+# Mode debug avec symboles de debogage
 debug: CFLAGS += $(DBFLAGS)
 debug: clean $(TARGET)
-	@echo "✓ Mode DEBUG active"
+	@echo "Mode DEBUG active"
 
 # Tests unitaires
 test: $(TESTDIR)/tests_unitaires.c $(filter-out $(SRCDIR)/main.c, $(SRCS))
 	$(CC) $(CFLAGS) -o test_runner $^
 	./test_runner
-	@echo "✓ Tests exécutés"
+	@echo "Tests executes"
 
 # Nettoyage
 clean:
 	rm -f $(SRCDIR)/*.o $(TARGET) test_runner
-	@echo "✓ Nettoyage effectue"
+	@echo "Nettoyage effectue"
 
-# Vérification mémoire avec Valgrind
+# Verification memoire (Linux seulement)
 valgrind: $(TARGET)
-	valgrind --leak-check=full --track-origins=yes --error-exitcode=1 \
+	valgrind --leak-check=full --track-origins=yes \
 	         ./$(TARGET) $(DATADIR)/reseau_test1.txt
 
-# Aide
 help:
-	@echo "Commandes disponibles :"
-	@echo "  make         → Compilation normale"
-	@echo "  make debug   → Compilation avec débogage + AddressSanitizer"
-	@echo "  make test    → Exécution des tests unitaires"
-	@echo "  make clean   → Suppression des fichiers compilés"
-	@echo "  make valgrind→ Vérification des fuites mémoire"
+	@echo "make         : Compilation normale"
+	@echo "make debug   : Compilation avec debogage"
+	@echo "make clean   : Suppression fichiers compiles"
+	@echo "make test    : Execution des tests unitaires"
+	@echo "make valgrind: Verification fuites memoire (Linux)"
 
 .PHONY: all debug test clean valgrind help

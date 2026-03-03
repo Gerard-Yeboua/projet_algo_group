@@ -4,7 +4,7 @@
  */
 
 #include "securite.h"
-#include "liste_chainee.h"
+#include "utils.h"
 
 /* ============================================================
  *  DFS et BFS
